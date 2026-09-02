@@ -39,6 +39,7 @@ export type Product = {
   avis_livraison: number | null;
   avis_qualite: number | null;
   avis_nombre: number | null;
+  actif: boolean;
 };
 
 export type ShippingRate = {
