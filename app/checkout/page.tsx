@@ -150,6 +150,28 @@ export default function CheckoutPage() {
           .eq("code", codeApplique.code);
       }
 
+      // Déclenche le workflow n8n "Nouvelle commande" (notifications, calcul fret, etc.)
+      // Si NEXT_PUBLIC_N8N_WEBHOOK_NOUVELLE_COMMANDE n'est pas encore configuré (n8n pas
+      // encore en ligne), cet appel échoue silencieusement — la commande reste créée
+      // normalement dans Supabase, ce n'est jamais bloquant pour le client.
+      const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_NOUVELLE_COMMANDE;
+      if (webhookUrl) {
+        try {
+          await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              order_id: order.id,
+              client_telephone: telephone,
+              client_email: user?.email ?? null,
+              mode_fret: selectedMode,
+            }),
+          });
+        } catch (webhookErr) {
+          console.error("Webhook n8n indisponible :", webhookErr);
+        }
+      }
+
       clearCart();
       router.push(`/commande/${order.id}`);
     } catch (err) {
@@ -221,7 +243,7 @@ export default function CheckoutPage() {
             {(["wave", "orange_money"] as const).map((mode) => (
               <label
                 key={mode}
-                className={`flex-1 text-center border rounded-md py-2 text-sm cursor-pointer ${
+                className={`flex-1 flex items-center justify-center gap-2 border rounded-md py-2.5 text-sm cursor-pointer ${
                   modePaiement === mode ? "border-clay-500 bg-clay-100" : "border-ink-900/15"
                 }`}
               >
@@ -233,7 +255,21 @@ export default function CheckoutPage() {
                   onChange={() => setModePaiement(mode)}
                   className="hidden"
                 />
-                {mode === "wave" ? "Wave" : "Orange Money"}
+                {mode === "wave" ? (
+                  <>
+                    <span className="w-6 h-6 rounded-full bg-[#1DC8E4] text-white text-xs font-bold flex items-center justify-center">
+                      W
+                    </span>
+                    <span>Wave</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-6 h-6 rounded-full bg-[#FF6600] text-white text-[10px] font-bold flex items-center justify-center">
+                      OM
+                    </span>
+                    <span>Orange Money</span>
+                  </>
+                )}
               </label>
             ))}
           </div>
