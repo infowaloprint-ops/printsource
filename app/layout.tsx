@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Heart, User, ShoppingCart } from "lucide-react";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import SearchBar from "@/components/SearchBar";
 import NotificationsBell from "@/components/NotificationsBell";
+import CartCountBadge from "@/components/CartCountBadge";
+import NestedCategoryMenu from "@/components/NestedCategoryMenu";
 
 export const metadata: Metadata = {
-  title: "PrintSource — Consommables d'imprimerie au meilleur prix",
-  description: "Consommables et machines d'impression importés directement, sans intermédiaire.",
+  title: "SourceTeranga — Import direct Chine au meilleur prix",
+  description: "Consommables, machines et équipements professionnels importés directement, sans intermédiaire.",
 };
-
-const CATEGORIES_NAV = [
-  { href: "/?categorie=tous", label: "Tous les articles" },
-  { href: "/?categorie=dtf", label: "Imprimerie" },
-  { href: "/?categorie=machines", label: "Sécurité" },
-  { href: "/?categorie=supports", label: "Emballage" },
-  { href: "/?categorie=encres", label: "Textile" },
-];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,38 +27,46 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
 
           <div className="bg-white border-b border-ink-900/10">
-            <div className="mx-auto max-w-6xl flex items-center gap-4 px-4 py-3">
-              <a href="/" className="text-lg font-semibold text-clay-600 whitespace-nowrap">PrintSource</a>
-              <Suspense fallback={<div className="flex-1" />}>
-                <SearchBar />
-              </Suspense>
-              <nav className="flex items-center gap-4 text-sm text-ink-900 whitespace-nowrap">
-                <a href="/favoris">Favoris</a>
-                <a href="/compte">Mon compte</a>
-                <a href="/panier">Panier</a>
-                <NotificationsBell />
-              </nav>
+            <div className="mx-auto max-w-6xl flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-4 px-4 py-3">
+              <div className="flex items-center justify-between w-full md:w-auto md:contents">
+                <a href="/" className="text-lg font-semibold text-clay-600 whitespace-nowrap md:order-1">
+                  SourceTeranga
+                </a>
+                <nav className="flex items-center gap-4 text-sm text-ink-900 whitespace-nowrap md:order-3">
+                  <a href="/favoris" aria-label="Favoris" title="Favoris">
+                    <Heart size={20} />
+                  </a>
+                  <a href="/compte" aria-label="Mon compte" title="Mon compte">
+                    <User size={20} />
+                  </a>
+                  <a href="/panier" aria-label="Panier" title="Panier" className="flex items-center">
+                    <ShoppingCart size={20} />
+                    <CartCountBadge />
+                  </a>
+                  <NotificationsBell />
+                </nav>
+              </div>
+              <div className="w-full md:w-auto md:flex-1 md:order-2">
+                <Suspense fallback={<div className="w-full h-10" />}>
+                  <SearchBar />
+                </Suspense>
+              </div>
             </div>
           </div>
 
           <div className="bg-paper border-b border-ink-900/10">
-            <div className="mx-auto max-w-6xl px-4 py-2 flex gap-5 overflow-x-auto">
-              {CATEGORIES_NAV.map((cat, i) => (
-                <a
-                  key={cat.href}
-                  href={cat.href}
-                  className={`text-xs whitespace-nowrap ${i === 0 ? "text-clay-600 font-medium" : "text-ink-900/60"}`}
-                >
-                  {cat.label}
-                </a>
-              ))}
+            <div className="mx-auto max-w-6xl px-4 py-2 flex items-center gap-4 md:gap-6 overflow-x-auto">
+              <NestedCategoryMenu />
+              <a href="/?categorie=tous" className="text-xs text-ink-900/60 whitespace-nowrap">
+                Tous les articles
+              </a>
             </div>
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
         <footer className="border-t border-ink-900/10 mt-16 py-8 text-sm text-ink-900/70">
           <div className="mx-auto max-w-6xl px-4">
-            PrintSource — Import direct Chine, consommables et machines d&apos;impression.
+            SourceTeranga — Import direct Chine, consommables et équipements professionnels.
           </div>
         </footer>
         </CartProvider>
