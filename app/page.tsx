@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { supabase, type Product, type Category } from "@/lib/supabase";
+import { useSearchParams } from "next/navigation";
+import { supabase, type Product } from "@/lib/supabase";
 import ProductCard from "@/components/ProductCard";
 import CategorySidebar from "@/components/CategorySidebar";
 
@@ -18,24 +18,12 @@ export default function HomePage() {
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const query = searchParams.get("q") ?? "";
   const categorie = searchParams.get("categorie") ?? "tous";
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [sousCategories, setSousCategories] = useState<Category[]>([]);
   const [tri, setTri] = useState<Tri>("recent");
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase
-      .from("categories")
-      .select("*")
-      .not("parent_id", "is", null)
-      .eq("disponible", true)
-      .order("ordre", { ascending: true })
-      .then(({ data }) => setSousCategories((data as Category[]) ?? []));
-  }, []);
 
   useEffect(() => {
     async function loadProducts() {
@@ -63,13 +51,6 @@ function HomeContent() {
     loadProducts();
   }, [categorie, tri, query]);
 
-  function changerCategorie(id: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (id === "tous") params.delete("categorie");
-    else params.set("categorie", id);
-    router.push(`/?${params.toString()}`);
-  }
-
   return (
     <div className="flex gap-6">
       <CategorySidebar />
@@ -90,32 +71,6 @@ function HomeContent() {
             Résultats pour <span className="font-medium text-ink-950">&laquo;{query}&raquo;</span>
           </p>
         )}
-
-        <div className="flex gap-2 overflow-x-auto mb-4 pb-1">
-          <button
-            onClick={() => changerCategorie("tous")}
-            className={`text-sm px-4 py-1.5 rounded-full whitespace-nowrap border ${
-              categorie === "tous"
-                ? "bg-clay-600 text-white border-clay-600"
-                : "border-ink-900/15 text-ink-900/70"
-            }`}
-          >
-            Tous
-          </button>
-          {sousCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => changerCategorie(cat.slug)}
-              className={`text-sm px-4 py-1.5 rounded-full whitespace-nowrap border ${
-                categorie === cat.slug
-                  ? "bg-clay-600 text-white border-clay-600"
-                  : "border-ink-900/15 text-ink-900/70"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
 
         <div className="flex items-center justify-end mb-3">
           <select

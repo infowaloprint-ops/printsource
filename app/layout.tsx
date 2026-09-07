@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Heart, User, ShoppingCart } from "lucide-react";
+import { Heart, User, ShoppingCart, MessageCircle } from "lucide-react";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import SearchBar from "@/components/SearchBar";
 import NotificationsBell from "@/components/NotificationsBell";
 import CartCountBadge from "@/components/CartCountBadge";
 import NestedCategoryMenu from "@/components/NestedCategoryMenu";
+import { NUMERO_WHATSAPP } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "SourceTeranga — Import direct Chine au meilleur prix",
@@ -42,6 +43,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <a href="/panier" aria-label="Panier" title="Panier" className="flex items-center">
                     <ShoppingCart size={20} />
                     <CartCountBadge />
+                  </a>
+                  <a
+                    href={`https://wa.me/${NUMERO_WHATSAPP}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Nous écrire sur WhatsApp"
+                    title="Nous écrire sur WhatsApp"
+                    className="text-[#25D366]"
+                  >
+                    <MessageCircle size={20} />
                   </a>
                   <NotificationsBell />
                 </nav>

@@ -257,16 +257,14 @@ export default function CheckoutPage() {
                 />
                 {mode === "wave" ? (
                   <>
-                    <span className="w-6 h-6 rounded-full bg-[#1DC8E4] text-white text-xs font-bold flex items-center justify-center">
-                      W
-                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/wave-logo.png" alt="Wave" className="h-6 w-auto" />
                     <span>Wave</span>
                   </>
                 ) : (
                   <>
-                    <span className="w-6 h-6 rounded-full bg-[#FF6600] text-white text-[10px] font-bold flex items-center justify-center">
-                      OM
-                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/orange-money-logo.png" alt="Orange Money" className="h-6 w-auto" />
                     <span>Orange Money</span>
                   </>
                 )}
