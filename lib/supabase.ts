@@ -42,6 +42,15 @@ export type Product = {
   actif: boolean;
 };
 
+export type Category = {
+  id: string;
+  parent_id: string | null;
+  slug: string;
+  label: string;
+  disponible: boolean;
+  ordre: number;
+};
+
 export type ShippingRate = {
   mode: "aerien" | "express" | "maritime";
   unite: "kg" | "cbm";
@@ -68,3 +77,4 @@ export type PromoCode = {
   usage_max: number | null;
   usage_actuel: number;
 };
+

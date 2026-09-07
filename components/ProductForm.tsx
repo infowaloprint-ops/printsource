@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, type Product } from "@/lib/supabase";
+import { supabase, type Product, type Category } from "@/lib/supabase";
 
 export default function ProductForm({ produitExistant }: { produitExistant?: Product }) {
   const router = useRouter();
   const [nom, setNom] = useState(produitExistant?.nom ?? "");
-  const [categorie, setCategorie] = useState(produitExistant?.categorie ?? "dtf");
+  const [categorie, setCategorie] = useState(produitExistant?.categorie ?? "");
+  const [sousCategories, setSousCategories] = useState<Category[]>([]);
   const [prixVente, setPrixVente] = useState(produitExistant?.prix_vente ?? 0);
   const [prixMarche, setPrixMarche] = useState(produitExistant?.prix_marche_reference ?? 0);
   const [poidsUnitaire, setPoidsUnitaire] = useState(produitExistant?.poids_unitaire ?? 0);
@@ -18,8 +19,25 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
     (produitExistant?.images ?? []).filter((img) => img !== produitExistant?.image_url)
   );
   const [nouvelleImage, setNouvelleImage] = useState("");
+  const [caracteristiques, setCaracteristiques] = useState<{ label: string; valeur: string }[]>(
+    produitExistant?.caracteristiques ?? []
+  );
+  const [nouveauLabel, setNouveauLabel] = useState("");
+  const [nouvelleValeur, setNouvelleValeur] = useState("");
   const [enregistrement, setEnregistrement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+
+  function ajouterCaracteristique() {
+    if (nouveauLabel.trim() && nouvelleValeur.trim()) {
+      setCaracteristiques((prev) => [...prev, { label: nouveauLabel.trim(), valeur: nouvelleValeur.trim() }]);
+      setNouveauLabel("");
+      setNouvelleValeur("");
+    }
+  }
+
+  function retirerCaracteristique(index: number) {
+    setCaracteristiques((prev) => prev.filter((_, i) => i !== index));
+  }
 
   function ajouterImageSecondaire() {
     if (nouvelleImage.trim()) {
@@ -31,6 +49,20 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
   function retirerImageSecondaire(index: number) {
     setImagesSecondaires((prev) => prev.filter((_, i) => i !== index));
   }
+
+  useEffect(() => {
+    supabase
+      .from("categories")
+      .select("*")
+      .not("parent_id", "is", null)
+      .order("ordre", { ascending: true })
+      .then(({ data }) => {
+        const cats = (data as Category[]) ?? [];
+        setSousCategories(cats);
+        if (!categorie && cats.length > 0) setCategorie(cats[0].slug);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +81,7 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
       moq,
       image_url: imageUrl || null,
       images: toutesLesImages.length > 0 ? toutesLesImages : null,
+      caracteristiques: caracteristiques.length > 0 ? caracteristiques : null,
     };
 
     const { error } = produitExistant
@@ -84,11 +117,17 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
           onChange={(e) => setCategorie(e.target.value)}
           className="w-full rounded-md border border-ink-900/15 px-3 py-2 text-sm"
         >
-          <option value="encres">Encres</option>
-          <option value="dtf">DTF</option>
-          <option value="supports">Supports</option>
-          <option value="machines">Machines</option>
+          {sousCategories.map((cat) => (
+            <option key={cat.id} value={cat.slug}>
+              {cat.label}
+            </option>
+          ))}
         </select>
+        {sousCategories.length === 0 && (
+          <p className="text-xs text-clay-600 mt-1">
+            Aucune sous-catégorie créée. Ajoutes-en une dans l&apos;onglet &laquo;Catégories&raquo;.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -187,6 +226,53 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
                 <button
                   type="button"
                   onClick={() => retirerImageSecondaire(i)}
+                  className="text-clay-600 ml-2"
+                >
+                  Retirer
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">Caractéristiques (matière, origine, température...)</label>
+        <div className="flex gap-2 mb-2">
+          <input
+            value={nouveauLabel}
+            onChange={(e) => setNouveauLabel(e.target.value)}
+            placeholder="Nom (ex. Origine)"
+            className="w-1/3 rounded-md border border-ink-900/15 px-3 py-2 text-sm"
+          />
+          <input
+            value={nouvelleValeur}
+            onChange={(e) => setNouvelleValeur(e.target.value)}
+            placeholder="Valeur (ex. Guangdong, Chine)"
+            className="flex-1 rounded-md border border-ink-900/15 px-3 py-2 text-sm"
+          />
+          <button
+            type="button"
+            onClick={ajouterCaracteristique}
+            className="px-4 rounded-md border border-ink-900/15 text-sm"
+          >
+            + Ajouter
+          </button>
+        </div>
+
+        {caracteristiques.length > 0 && (
+          <ul className="space-y-1">
+            {caracteristiques.map((carac, i) => (
+              <li
+                key={i}
+                className="flex items-center justify-between bg-paper rounded-md px-3 py-1.5 text-xs"
+              >
+                <span className="flex-1">
+                  <span className="font-medium">{carac.label}</span> — {carac.valeur}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => retirerCaracteristique(i)}
                   className="text-clay-600 ml-2"
                 >
                   Retirer

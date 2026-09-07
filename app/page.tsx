@@ -2,18 +2,10 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { supabase, type Product } from "@/lib/supabase";
+import { supabase, type Product, type Category } from "@/lib/supabase";
 import ProductCard from "@/components/ProductCard";
 
 type Tri = "recent" | "prix_asc" | "prix_desc";
-
-const CATEGORIES = [
-  { id: "tous", label: "Tous" },
-  { id: "encres", label: "Encres" },
-  { id: "dtf", label: "DTF" },
-  { id: "supports", label: "Supports" },
-  { id: "machines", label: "Machines" },
-];
 
 export default function HomePage() {
   return (
@@ -30,8 +22,19 @@ function HomeContent() {
   const categorie = searchParams.get("categorie") ?? "tous";
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [sousCategories, setSousCategories] = useState<Category[]>([]);
   const [tri, setTri] = useState<Tri>("recent");
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from("categories")
+      .select("*")
+      .not("parent_id", "is", null)
+      .eq("disponible", true)
+      .order("ordre", { ascending: true })
+      .then(({ data }) => setSousCategories((data as Category[]) ?? []));
+  }, []);
 
   useEffect(() => {
     async function loadProducts() {
@@ -85,12 +88,22 @@ function HomeContent() {
       )}
 
       <div className="flex gap-2 overflow-x-auto mb-4 pb-1">
-        {CATEGORIES.map((cat) => (
+        <button
+          onClick={() => changerCategorie("tous")}
+          className={`text-sm px-4 py-1.5 rounded-full whitespace-nowrap border ${
+            categorie === "tous"
+              ? "bg-clay-600 text-white border-clay-600"
+              : "border-ink-900/15 text-ink-900/70"
+          }`}
+        >
+          Tous
+        </button>
+        {sousCategories.map((cat) => (
           <button
             key={cat.id}
-            onClick={() => changerCategorie(cat.id)}
+            onClick={() => changerCategorie(cat.slug)}
             className={`text-sm px-4 py-1.5 rounded-full whitespace-nowrap border ${
-              categorie === cat.id
+              categorie === cat.slug
                 ? "bg-clay-600 text-white border-clay-600"
                 : "border-ink-900/15 text-ink-900/70"
             }`}

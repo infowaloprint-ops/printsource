@@ -27,6 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const liens = [
     { href: "/admin/produits", label: "Produits" },
+    { href: "/admin/categories", label: "Catégories" },
     { href: "/admin/commandes", label: "Commandes" },
   ];
 
