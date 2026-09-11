@@ -243,7 +243,7 @@ export default function CheckoutPage() {
             {(["wave", "orange_money"] as const).map((mode) => (
               <label
                 key={mode}
-                className={`flex-1 flex items-center justify-center gap-2 border rounded-md py-2.5 text-sm cursor-pointer ${
+                className={`flex-1 flex items-center justify-center gap-2 border rounded-md py-3 cursor-pointer ${
                   modePaiement === mode ? "border-clay-500 bg-clay-100" : "border-ink-900/15"
                 }`}
               >
@@ -256,17 +256,11 @@ export default function CheckoutPage() {
                   className="hidden"
                 />
                 {mode === "wave" ? (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/wave-logo.png" alt="Wave" className="h-6 w-auto" />
-                    <span>Wave</span>
-                  </>
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src="/wave-logo.png" alt="Wave" className="h-9 w-auto" />
                 ) : (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/orange-money-logo.png" alt="Orange Money" className="h-6 w-auto" />
-                    <span>Orange Money</span>
-                  </>
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src="/orange-money-logo.png" alt="Orange Money" className="h-9 w-auto" />
                 )}
               </label>
             ))}

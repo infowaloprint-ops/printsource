@@ -14,6 +14,7 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
   const [poidsUnitaire, setPoidsUnitaire] = useState(produitExistant?.poids_unitaire ?? 0);
   const [volumeUnitaire, setVolumeUnitaire] = useState(produitExistant?.volume_unitaire ?? 0);
   const [moq, setMoq] = useState(produitExistant?.moq ?? 1);
+  const [enVedette, setEnVedette] = useState(produitExistant?.en_vedette ?? false);
   const [imageUrl, setImageUrl] = useState(produitExistant?.image_url ?? "");
   const [imagesSecondaires, setImagesSecondaires] = useState<string[]>(
     (produitExistant?.images ?? []).filter((img) => img !== produitExistant?.image_url)
@@ -79,6 +80,7 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
       poids_unitaire: poidsUnitaire,
       volume_unitaire: volumeUnitaire,
       moq,
+      en_vedette: enVedette,
       image_url: imageUrl || null,
       images: toutesLesImages.length > 0 ? toutesLesImages : null,
       caracteristiques: caracteristiques.length > 0 ? caracteristiques : null,
@@ -185,6 +187,19 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
             className="w-full rounded-md border border-ink-900/15 px-3 py-2 text-sm"
           />
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 bg-paper rounded-md px-3 py-2.5">
+        <input
+          type="checkbox"
+          id="en_vedette"
+          checked={enVedette}
+          onChange={(e) => setEnVedette(e.target.checked)}
+          className="w-4 h-4"
+        />
+        <label htmlFor="en_vedette" className="text-sm">
+          Produit en vedette (affiché sur la page d&apos;accueil)
+        </label>
       </div>
 
       <div>

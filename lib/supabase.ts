@@ -40,6 +40,7 @@ export type Product = {
   avis_qualite: number | null;
   avis_nombre: number | null;
   actif: boolean;
+  en_vedette: boolean;
 };
 
 export type Category = {
@@ -50,7 +51,6 @@ export type Category = {
   disponible: boolean;
   ordre: number;
 };
-
 export type ShippingRate = {
   mode: "aerien" | "express" | "maritime";
   unite: "kg" | "cbm";
@@ -77,4 +77,3 @@ export type PromoCode = {
   usage_max: number | null;
   usage_actuel: number;
 };
-

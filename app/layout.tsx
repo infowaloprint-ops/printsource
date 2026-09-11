@@ -50,9 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     rel="noopener noreferrer"
                     aria-label="Nous écrire sur WhatsApp"
                     title="Nous écrire sur WhatsApp"
-                    className="text-[#25D366]"
+                    className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center"
                   >
-                    <MessageCircle size={20} />
+                    <MessageCircle size={18} fill="white" strokeWidth={0} />
                   </a>
                   <NotificationsBell />
                 </nav>
@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
 
           <div className="bg-paper border-b border-ink-900/10">
-            <div className="mx-auto max-w-6xl px-4 py-2 flex items-center gap-4 md:gap-6 overflow-x-auto">
+            <div className="mx-auto max-w-6xl px-4 py-2 flex items-center gap-4 md:gap-6">
               <NestedCategoryMenu />
               <a href="/?categorie=tous" className="text-xs text-ink-900/60 whitespace-nowrap">
                 Tous les articles

@@ -30,6 +30,13 @@ function HomeContent() {
       setLoading(true);
       let request = supabase.from("products").select("*").eq("actif", true);
 
+      const vueParDefaut = categorie === "tous" && !query.trim();
+
+      if (vueParDefaut) {
+        // Sans catégorie ni recherche précisée : on ne montre que la sélection
+        // "en vedette", pas tout le catalogue d'un coup.
+        request = request.eq("en_vedette", true);
+      }
       if (categorie !== "tous") {
         request = request.eq("categorie", categorie);
       }
@@ -50,6 +57,8 @@ function HomeContent() {
     }
     loadProducts();
   }, [categorie, tri, query]);
+
+  const vueParDefaut = categorie === "tous" && !query.trim();
 
   return (
     <div className="flex gap-6">
@@ -72,6 +81,10 @@ function HomeContent() {
           </p>
         )}
 
+        {vueParDefaut && !loading && products.length > 0 && (
+          <p className="text-sm font-medium mb-3">Produits en vedette</p>
+        )}
+
         <div className="flex items-center justify-end mb-3">
           <select
             value={tri}
@@ -87,7 +100,11 @@ function HomeContent() {
         {loading ? (
           <p className="text-sm text-ink-900/60">Chargement du catalogue...</p>
         ) : products.length === 0 ? (
-          <p className="text-sm text-ink-900/60">Aucun article ne correspond à cette recherche.</p>
+          <p className="text-sm text-ink-900/60">
+            {vueParDefaut
+              ? "Aucun produit en vedette pour l'instant. Parcours une catégorie dans le menu pour voir tout le catalogue."
+              : "Aucun article ne correspond à cette recherche."}
+          </p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {products.map((p) => (
