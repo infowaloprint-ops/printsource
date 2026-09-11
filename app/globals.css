@@ -6,3 +6,12 @@ body {
   background-color: #F7F5F0;
   color: #0F1B2B;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background-color: white;
+  }
+}

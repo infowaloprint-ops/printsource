@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr">
       <body className="font-sans">
         <CartProvider>
-        <header className="sticky top-0 z-10">
+        <header className="no-print sticky top-0 z-10">
           <div className="bg-clay-600 text-white text-xs">
             <div className="mx-auto max-w-6xl px-4 py-1.5 flex justify-end gap-4">
               <span>Livraison au Sénégal</span>
@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
-        <footer className="border-t border-ink-900/10 mt-16 py-8 text-sm text-ink-900/70">
+        <footer className="no-print border-t border-ink-900/10 mt-16 py-8 text-sm text-ink-900/70">
           <div className="mx-auto max-w-6xl px-4">
             SourceTeranga — Import direct Chine, consommables et équipements professionnels.
           </div>
