@@ -7,9 +7,11 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 // Ne jamais utiliser la clé service_role ici.
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type ProductVariantOption =
-  | string
-  | { label: string; image_url: string };
+export type ProductVariantOption = {
+  label: string;
+  image_url?: string;
+  prix?: number; // si défini, remplace le prix de base quand cette option est choisie
+};
 
 export type ProductVariantGroup = {
   label: string; // ex. "Couleur", "Taille", "Emballage"

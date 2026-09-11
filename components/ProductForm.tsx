@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, type Product, type Category } from "@/lib/supabase";
+import { supabase, type Product, type Category, type ProductVariantGroup } from "@/lib/supabase";
+import VariantsEditor from "@/components/VariantsEditor";
 
 export default function ProductForm({ produitExistant }: { produitExistant?: Product }) {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
   );
   const [nouveauLabel, setNouveauLabel] = useState("");
   const [nouvelleValeur, setNouvelleValeur] = useState("");
+  const [variantes, setVariantes] = useState<ProductVariantGroup[]>(produitExistant?.variantes ?? []);
   const [enregistrement, setEnregistrement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -84,6 +86,7 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
       image_url: imageUrl || null,
       images: toutesLesImages.length > 0 ? toutesLesImages : null,
       caracteristiques: caracteristiques.length > 0 ? caracteristiques : null,
+      variantes: variantes.length > 0 ? variantes : null,
     };
 
     const { error } = produitExistant
@@ -296,6 +299,13 @@ export default function ProductForm({ produitExistant }: { produitExistant?: Pro
             ))}
           </ul>
         )}
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">
+          Variantes (ex. Têtes d&apos;impression, Couleur, Taille — avec prix optionnel par option)
+        </label>
+        <VariantsEditor variantes={variantes} onChange={setVariantes} />
       </div>
 
       {erreur && <p className="text-sm text-clay-600">{erreur}</p>}
