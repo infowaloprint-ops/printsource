@@ -139,6 +139,7 @@ export default function CheckoutPage() {
         order_id: order.id,
         product_id: i.productId,
         quantite: i.quantite,
+        prix_unitaire: i.prixVente,
       }));
       const { error: itemsError } = await supabase.from("order_items").insert(orderItemsPayload);
       if (itemsError) throw itemsError;
