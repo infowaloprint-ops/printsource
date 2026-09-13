@@ -17,7 +17,7 @@ export default function ProductImageCarousel({
 
   if (images.length === 0) {
     return (
-      <div className="h-72 md:h-96 bg-paper rounded-lg flex items-center justify-center">
+      <div className="aspect-[4/5] bg-paper rounded-lg flex items-center justify-center">
         <span className="text-ink-900/30 text-sm">Photo à venir</span>
       </div>
     );
@@ -28,7 +28,7 @@ export default function ProductImageCarousel({
 
   return (
     <div>
-      <div className="relative h-72 md:h-96 bg-paper rounded-lg overflow-hidden">
+      <div className="relative aspect-[4/5] bg-paper rounded-lg overflow-hidden">
         {isVideo ? (
           <video
             src={media}
@@ -39,7 +39,7 @@ export default function ProductImageCarousel({
           </video>
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={media} alt={`${nom} - photo ${index + 1}`} className="w-full h-full object-contain" />
+          <img src={media} alt={`${nom} - photo ${index + 1}`} className="w-full h-full object-cover" />
         )}
 
         {images.length > 1 && (
