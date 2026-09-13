@@ -17,10 +17,10 @@ export default function ProductCard({ product }: { product: Product }) {
       href={`/produits/${product.id}`}
       className="block rounded-lg border border-ink-900/10 bg-white overflow-hidden hover:border-ink-900/25 transition-colors"
     >
-      <div className="relative h-28 bg-paper flex items-center justify-center">
+      <div className="relative h-32 bg-paper flex items-center justify-center p-2">
         {product.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image_url} alt={product.nom} className="h-full w-full object-cover" />
+          <img src={product.image_url} alt={product.nom} className="max-h-full max-w-full object-contain" />
         ) : (
           <span className="text-ink-900/30 text-xs">Photo à venir</span>
         )}

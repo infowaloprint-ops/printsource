@@ -39,7 +39,7 @@ export default function ProductImageCarousel({
           </video>
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={media} alt={`${nom} - photo ${index + 1}`} className="w-full h-full object-cover" />
+          <img src={media} alt={`${nom} - photo ${index + 1}`} className="w-full h-full object-contain" />
         )}
 
         {images.length > 1 && (
