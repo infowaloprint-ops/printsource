@@ -1,7 +1,7 @@
 const BADGES = [
-  { label: "Politique de remboursement", detail: "Si article non conforme" },
-  { label: "Service client", detail: "Réponse rapide sur WhatsApp" },
-  { label: "Confidentialité", detail: "Vos données restent privées" },
+  { label: "Politique de remboursement", detail: "Si article non conforme", href: "/politique-remboursement" },
+  { label: "Service client", detail: "Réponse rapide sur WhatsApp", href: null },
+  { label: "Confidentialité", detail: "Vos données restent privées", href: "/confidentialite" },
 ];
 
 export default function TrustBadges() {
@@ -20,12 +20,19 @@ export default function TrustBadges() {
           </span>
         </div>
       </div>
-      {BADGES.map((badge) => (
-        <div key={badge.label}>
-          <p className="text-sm font-medium">{badge.label}</p>
-          <p className="text-xs text-ink-900/50">{badge.detail}</p>
-        </div>
-      ))}
+      {BADGES.map((badge) =>
+        badge.href ? (
+          <a key={badge.label} href={badge.href} className="hover:opacity-70">
+            <p className="text-sm font-medium underline decoration-ink-900/20">{badge.label}</p>
+            <p className="text-xs text-ink-900/50">{badge.detail}</p>
+          </a>
+        ) : (
+          <div key={badge.label}>
+            <p className="text-sm font-medium">{badge.label}</p>
+            <p className="text-xs text-ink-900/50">{badge.detail}</p>
+          </div>
+        )
+      )}
     </div>
   );
 }

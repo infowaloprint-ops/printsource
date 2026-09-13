@@ -76,8 +76,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
         <footer className="no-print border-t border-ink-900/10 mt-16 py-8 text-sm text-ink-900/70">
-          <div className="mx-auto max-w-6xl px-4">
-            SourceTeranga — Import direct Chine, consommables et équipements professionnels.
+          <div className="mx-auto max-w-6xl px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <span>SourceTeranga — Import direct Chine, consommables et équipements professionnels.</span>
+            <div className="flex gap-4 text-xs">
+              <a href="/cgv" className="hover:text-clay-600">Conditions générales</a>
+              <a href="/politique-remboursement" className="hover:text-clay-600">Retours &amp; remboursement</a>
+              <a href="/confidentialite" className="hover:text-clay-600">Confidentialité</a>
+            </div>
           </div>
         </footer>
         </CartProvider>
