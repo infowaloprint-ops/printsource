@@ -7,6 +7,11 @@ function formatFcfa(n: number) {
   return Math.round(n).toLocaleString("fr-FR") + " FCFA";
 }
 
+function formatNumeroFacture(numeroSequence: number, dateCreation: string) {
+  const annee = new Date(dateCreation).getFullYear();
+  return `STG-${annee}-${String(numeroSequence).padStart(6, "0")}`;
+}
+
 const ETAPES = [
   { id: "en_attente_paiement", label: "Commande créée" },
   { id: "paye", label: "Paiement reçu" },
@@ -24,6 +29,7 @@ const LABELS_PAIEMENT: Record<string, string> = {
 
 type Order = {
   id: string;
+  numero_sequence: number;
   statut: string;
   client_nom: string;
   client_telephone: string;
@@ -74,7 +80,7 @@ export default function CommandePage({ params }: { params: { id: string } }) {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="no-print flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">Commande #{order.id.slice(0, 8)}</h1>
+          <h1 className="text-lg font-semibold">Commande {formatNumeroFacture(order.numero_sequence, order.created_at)}</h1>
           <p className="text-sm text-ink-900/60">Merci pour votre commande.</p>
         </div>
         <button
@@ -124,7 +130,7 @@ export default function CommandePage({ params }: { params: { id: string } }) {
             </div>
           </div>
           <div className="text-right text-xs text-white/85">
-            <p className="font-medium">#{order.id.slice(0, 8).toUpperCase()}</p>
+            <p className="font-medium">{formatNumeroFacture(order.numero_sequence, order.created_at)}</p>
             <p>
               {new Date(order.created_at).toLocaleDateString("fr-FR", {
                 day: "2-digit",

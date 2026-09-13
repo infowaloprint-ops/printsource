@@ -7,6 +7,11 @@ function formatFcfa(n: number) {
   return Math.round(n).toLocaleString("fr-FR") + " FCFA";
 }
 
+function formatNumeroFacture(numeroSequence: number, dateCreation: string) {
+  const annee = new Date(dateCreation).getFullYear();
+  return `STG-${annee}-${String(numeroSequence).padStart(6, "0")}`;
+}
+
 const STATUTS = [
   "en_attente_paiement",
   "paye",
@@ -31,6 +36,7 @@ const LABELS: Record<string, string> = {
 
 type Order = {
   id: string;
+  numero_sequence: number;
   client_nom: string;
   client_telephone: string;
   ville_client: string;
@@ -76,7 +82,7 @@ export default function AdminCommandesPage() {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <p className="text-sm font-medium">
-                    #{order.id.slice(0, 8)} — {order.client_nom}
+                    {formatNumeroFacture(order.numero_sequence, order.created_at)} — {order.client_nom}
                   </p>
                   <p className="text-xs text-ink-900/50">
                     {order.client_telephone} · {order.ville_client} ·{" "}

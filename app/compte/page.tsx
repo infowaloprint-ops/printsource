@@ -9,6 +9,11 @@ function formatFcfa(n: number) {
   return Math.round(n).toLocaleString("fr-FR") + " FCFA";
 }
 
+function formatNumeroFacture(numeroSequence: number, dateCreation: string) {
+  const annee = new Date(dateCreation).getFullYear();
+  return `STG-${annee}-${String(numeroSequence).padStart(6, "0")}`;
+}
+
 const LABELS_STATUT: Record<string, string> = {
   en_attente_paiement: "En attente de paiement",
   paye: "Paiement reçu",
@@ -21,6 +26,7 @@ const LABELS_STATUT: Record<string, string> = {
 
 type Order = {
   id: string;
+  numero_sequence: number;
   statut: string;
   montant_total: number;
   created_at: string;
@@ -46,7 +52,7 @@ export default function ComptePage() {
 
       const { data } = await supabase
         .from("orders")
-        .select("id, statut, montant_total, created_at")
+        .select("id, numero_sequence, statut, montant_total, created_at")
         .eq("client_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -90,7 +96,9 @@ export default function ComptePage() {
                 className="flex items-center justify-between border border-ink-900/10 rounded-md p-3 hover:border-ink-900/25"
               >
                 <div>
-                  <p className="text-sm font-medium">Commande #{order.id.slice(0, 8)}</p>
+                  <p className="text-sm font-medium">
+                    Commande {formatNumeroFacture(order.numero_sequence, order.created_at)}
+                  </p>
                   <p className="text-xs text-ink-900/50">
                     {new Date(order.created_at).toLocaleDateString("fr-FR")} ·{" "}
                     {LABELS_STATUT[order.statut] ?? order.statut}
