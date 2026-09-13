@@ -71,7 +71,7 @@ export default function CommandePage({ params }: { params: { id: string } }) {
   const etapeActive = ETAPES.findIndex((e) => e.id === order.statut);
 
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       <div className="no-print flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold">Commande #{order.id.slice(0, 8)}</h1>
@@ -79,23 +79,26 @@ export default function CommandePage({ params }: { params: { id: string } }) {
         </div>
         <button
           onClick={() => window.print()}
-          className="text-sm border border-ink-900/15 rounded-md px-3 py-1.5"
+          className="text-sm border border-ink-900/15 rounded-md px-3 py-1.5 hover:bg-paper"
         >
           Télécharger le reçu
         </button>
       </div>
 
-      <div className="no-print space-y-3">
+      <div className="no-print flex items-center gap-2 overflow-x-auto pb-1">
         {ETAPES.map((etape, i) => (
-          <div key={etape.id} className="flex items-center gap-3">
+          <div key={etape.id} className="flex items-center gap-2 shrink-0">
             <div
-              className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                i <= etapeActive ? "bg-ink-950" : "bg-ink-900/15"
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 ${
+                i <= etapeActive ? "bg-ink-950 text-white" : "bg-ink-900/10 text-ink-900/30"
               }`}
-            />
-            <p className={`text-sm ${i <= etapeActive ? "text-ink-950" : "text-ink-900/40"}`}>
+            >
+              {i < etapeActive ? "✓" : i + 1}
+            </div>
+            <p className={`text-xs whitespace-nowrap ${i <= etapeActive ? "text-ink-950" : "text-ink-900/35"}`}>
               {etape.label}
             </p>
+            {i < ETAPES.length - 1 && <div className="w-4 h-px bg-ink-900/10 shrink-0" />}
           </div>
         ))}
       </div>
@@ -107,85 +110,120 @@ export default function CommandePage({ params }: { params: { id: string } }) {
         </p>
       )}
 
-      {/* Reçu — visible à l'écran et à l'impression/téléchargement */}
-      <div className="border border-ink-900/10 rounded-lg p-5">
-        <div className="flex items-center justify-between mb-4 pb-4 border-b border-ink-900/10">
-          <div>
-            <p className="text-lg font-semibold text-clay-600">SourceTeranga</p>
-            <p className="text-xs text-ink-900/50">Reçu de commande</p>
+      {/* ============ REÇU — visible à l'écran et à l'impression ============ */}
+      <div className="border border-ink-900/10 rounded-xl overflow-hidden bg-white shadow-sm print:shadow-none print:border-0">
+        {/* En-tête */}
+        <div className="bg-clay-600 px-6 py-5 flex items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center font-semibold text-lg">
+              S
+            </div>
+            <div>
+              <p className="font-semibold leading-tight">SourceTeranga</p>
+              <p className="text-xs text-white/75">Reçu de commande</p>
+            </div>
           </div>
-          <div className="text-right text-xs text-ink-900/60">
-            <p>Commande #{order.id.slice(0, 8)}</p>
-            <p>{new Date(order.created_at).toLocaleDateString("fr-FR", {
-              day: "2-digit", month: "long", year: "numeric",
-            })}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-          <div>
-            <p className="text-xs text-ink-900/50 mb-1">Client</p>
-            <p>{order.client_nom}</p>
-            <p className="text-ink-900/60">{order.client_telephone}</p>
-          </div>
-          <div>
-            <p className="text-xs text-ink-900/50 mb-1">Livraison</p>
-            <p>{order.ville_client}</p>
-            {order.region_client && <p className="text-ink-900/60">{order.region_client}</p>}
+          <div className="text-right text-xs text-white/85">
+            <p className="font-medium">#{order.id.slice(0, 8).toUpperCase()}</p>
+            <p>
+              {new Date(order.created_at).toLocaleDateString("fr-FR", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
           </div>
         </div>
 
-        <div className="mb-4">
-          <p className="text-xs text-ink-900/50 mb-2">Articles</p>
-          <div className="space-y-1.5">
-            {lignes.map((ligne) => (
-              <div key={ligne.id} className="flex justify-between text-sm">
-                <span>
-                  {ligne.products?.nom ?? "Article"} × {ligne.quantite}
-                </span>
-                <span>{formatFcfa(ligne.prix_unitaire * ligne.quantite)}</span>
+        <div className="p-6 space-y-6">
+          {/* Client & livraison */}
+          <div className="grid grid-cols-2 gap-6 text-sm">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-ink-900/40 mb-1.5">Facturé à</p>
+              <p className="font-medium">{order.client_nom}</p>
+              <p className="text-ink-900/60">{order.client_telephone}</p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-ink-900/40 mb-1.5">Livraison</p>
+              <p className="font-medium">{order.ville_client}</p>
+              {order.region_client && <p className="text-ink-900/60">{order.region_client}</p>}
+            </div>
+          </div>
+
+          {/* Tableau articles */}
+          <div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-[11px] uppercase tracking-wide text-ink-900/40 border-b border-ink-900/10">
+                  <th className="text-left font-medium pb-2">Article</th>
+                  <th className="text-center font-medium pb-2">Qté</th>
+                  <th className="text-right font-medium pb-2">Prix unit.</th>
+                  <th className="text-right font-medium pb-2">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lignes.map((ligne) => (
+                  <tr key={ligne.id} className="border-b border-ink-900/5">
+                    <td className="py-2">{ligne.products?.nom ?? "Article"}</td>
+                    <td className="py-2 text-center text-ink-900/60">{ligne.quantite}</td>
+                    <td className="py-2 text-right text-ink-900/60">{formatFcfa(ligne.prix_unitaire)}</td>
+                    <td className="py-2 text-right font-medium">
+                      {formatFcfa(ligne.prix_unitaire * ligne.quantite)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totaux */}
+          <div className="flex justify-end">
+            <div className="w-full max-w-[240px] space-y-1.5 text-sm">
+              <div className="flex justify-between text-ink-900/70">
+                <span>Sous-total</span>
+                <span>{formatFcfa(order.montant_produits)}</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-1 pt-3 border-t border-ink-900/10">
-          <div className="flex justify-between text-sm text-ink-900/70">
-            <span>Sous-total produits</span>
-            <span>{formatFcfa(order.montant_produits)}</span>
-          </div>
-          <div className="flex justify-between text-sm text-ink-900/70">
-            <span>Fret ({order.mode_fret})</span>
-            <span>{formatFcfa(order.prix_fret)}</span>
-          </div>
-          {order.reduction_appliquee ? (
-            <div className="flex justify-between text-sm text-green-700">
-              <span>Réduction {order.code_promo ? `(${order.code_promo})` : ""}</span>
-              <span>-{formatFcfa(order.reduction_appliquee)}</span>
+              <div className="flex justify-between text-ink-900/70">
+                <span>Fret ({order.mode_fret})</span>
+                <span>{formatFcfa(order.prix_fret)}</span>
+              </div>
+              {order.reduction_appliquee ? (
+                <div className="flex justify-between text-green-700">
+                  <span>Réduction {order.code_promo ? `(${order.code_promo})` : ""}</span>
+                  <span>-{formatFcfa(order.reduction_appliquee)}</span>
+                </div>
+              ) : null}
+              <div className="flex justify-between text-base font-semibold pt-2 border-t border-ink-900/10">
+                <span>Total payé</span>
+                <span>{formatFcfa(order.montant_total)}</span>
+              </div>
             </div>
-          ) : null}
-          <div className="flex justify-between text-base font-semibold pt-1">
-            <span>Total payé</span>
-            <span>{formatFcfa(order.montant_total)}</span>
           </div>
-        </div>
 
-        <div className="mt-4 pt-3 border-t border-ink-900/10 text-sm text-ink-900/70">
-          <div className="flex justify-between">
-            <span>Mode de paiement</span>
-            <span>{order.mode_paiement ? LABELS_PAIEMENT[order.mode_paiement] : "—"}</span>
-          </div>
-          {order.delai_estime && (
-            <div className="flex justify-between mt-1">
-              <span>Délai de livraison estimé</span>
-              <span>{order.delai_estime}</span>
+          {/* Paiement & livraison */}
+          <div className="grid grid-cols-2 gap-6 text-sm pt-4 border-t border-ink-900/10">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-ink-900/40 mb-1">Mode de paiement</p>
+              <p>{order.mode_paiement ? LABELS_PAIEMENT[order.mode_paiement] : "—"}</p>
             </div>
-          )}
+            {order.delai_estime && (
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-ink-900/40 mb-1">Délai estimé</p>
+                <p>{order.delai_estime}</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        <p className="text-xs text-ink-900/40 text-center mt-5 pt-3 border-t border-ink-900/10">
-          Merci pour votre confiance — SourceTeranga
-        </p>
+        {/*
+          Pied de page légal — à compléter dès que le NINEA/RCCM et la raison
+          sociale officielle sont confirmés (entreprise individuelle).
+          Exemple à activer plus tard :
+          <p>NINEA XXXXXXX · RCCM SN-DKR-XXXX-X-XXXX · [Nom légal de l'entreprise]</p>
+        */}
+        <div className="bg-paper px-6 py-4 text-center">
+          <p className="text-xs text-ink-900/40">Merci pour votre confiance — SourceTeranga</p>
+        </div>
       </div>
     </div>
   );
