@@ -133,7 +133,10 @@ export default function CheckoutPage() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // DIAGNOSTIC TEMPORAIRE : affiche le vrai message Supabase à l'écran.
+        throw new Error(`[orders] ${error.message} (code: ${error.code ?? "?"})`);
+      }
 
       const orderItemsPayload = items.map((i) => ({
         order_id: order.id,
@@ -142,7 +145,10 @@ export default function CheckoutPage() {
         prix_unitaire: i.prixVente,
       }));
       const { error: itemsError } = await supabase.from("order_items").insert(orderItemsPayload);
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        // DIAGNOSTIC TEMPORAIRE : affiche le vrai message Supabase à l'écran.
+        throw new Error(`[order_items] ${itemsError.message} (code: ${itemsError.code ?? "?"})`);
+      }
 
       if (codeApplique) {
         await supabase
@@ -151,10 +157,6 @@ export default function CheckoutPage() {
           .eq("code", codeApplique.code);
       }
 
-      // Déclenche le workflow n8n "Nouvelle commande" (notifications, calcul fret, etc.)
-      // Si NEXT_PUBLIC_N8N_WEBHOOK_NOUVELLE_COMMANDE n'est pas encore configuré (n8n pas
-      // encore en ligne), cet appel échoue silencieusement — la commande reste créée
-      // normalement dans Supabase, ce n'est jamais bloquant pour le client.
       const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_NOUVELLE_COMMANDE;
       if (webhookUrl) {
         try {
@@ -176,8 +178,12 @@ export default function CheckoutPage() {
       clearCart();
       router.push(`/commande/${order.id}`);
     } catch (err) {
+      // DIAGNOSTIC TEMPORAIRE : message détaillé au lieu du message générique,
+      // le temps de trouver la cause exacte du bug mobile. À revenir en arrière
+      // une fois corrigé (voir commentaire plus bas).
+      const detail = err instanceof Error ? err.message : JSON.stringify(err);
       console.error(err);
-      setErreur("Une erreur est survenue lors de la création de la commande. Merci de réessayer.");
+      setErreur(`Erreur de diagnostic : ${detail}`);
     } finally {
       setEnvoiEnCours(false);
     }
@@ -268,7 +274,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {erreur && <p className="text-sm text-clay-600">{erreur}</p>}
+        {erreur && <p className="text-sm text-clay-600 break-words">{erreur}</p>}
 
         <button
           type="submit"
