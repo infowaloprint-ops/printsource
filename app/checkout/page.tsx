@@ -108,12 +108,15 @@ export default function CheckoutPage() {
     try {
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
+
+      const clientId = !userError && user ? user.id : null;
 
       const { data: order, error } = await supabase
         .from("orders")
         .insert({
-          client_id: user?.id ?? null,
+          client_id: clientId,
           client_nom: nom,
           client_telephone: telephone,
           client_email: user?.email ?? null,
@@ -134,8 +137,12 @@ export default function CheckoutPage() {
         .single();
 
       if (error) {
-        // DIAGNOSTIC TEMPORAIRE : affiche le vrai message Supabase à l'écran.
-        throw new Error(`[orders] ${error.message} (code: ${error.code ?? "?"})`);
+        // DIAGNOSTIC TEMPORAIRE : détail complet de l'état d'authentification au moment de l'échec.
+        throw new Error(
+          `[orders] ${error.message} (code: ${error.code ?? "?"}) — userError: ${
+            userError ? userError.message : "aucune"
+          } — user.id: ${user?.id ?? "null"} — clientId envoyé: ${clientId ?? "null"}`
+        );
       }
 
       const orderItemsPayload = items.map((i) => ({
