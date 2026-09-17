@@ -112,10 +112,12 @@ export default function CheckoutPage() {
       } = await supabase.auth.getUser();
 
       const clientId = !userError && user ? user.id : null;
+      const orderId = crypto.randomUUID();
 
-      const { data: order, error } = await supabase
+      const { error } = await supabase
         .from("orders")
         .insert({
+          id: orderId,
           client_id: clientId,
           client_nom: nom,
           client_telephone: telephone,
@@ -132,29 +134,21 @@ export default function CheckoutPage() {
           reduction_appliquee: reduction || null,
           delai_estime: delaiEstime,
           statut: "en_attente_paiement",
-        })
-        .select()
-        .single();
+        });
 
       if (error) {
-        // DIAGNOSTIC TEMPORAIRE : détail complet de l'état d'authentification au moment de l'échec.
-        throw new Error(
-          `[orders] ${error.message} (code: ${error.code ?? "?"}) — userError: ${
-            userError ? userError.message : "aucune"
-          } — user.id: ${user?.id ?? "null"} — clientId envoyé: ${clientId ?? "null"}`
-        );
+        throw new Error(`Impossible de créer la commande : ${error.message}`);
       }
 
       const orderItemsPayload = items.map((i) => ({
-        order_id: order.id,
+        order_id: orderId,
         product_id: i.productId,
         quantite: i.quantite,
         prix_unitaire: i.prixVente,
       }));
       const { error: itemsError } = await supabase.from("order_items").insert(orderItemsPayload);
       if (itemsError) {
-        // DIAGNOSTIC TEMPORAIRE : affiche le vrai message Supabase à l'écran.
-        throw new Error(`[order_items] ${itemsError.message} (code: ${itemsError.code ?? "?"})`);
+        throw new Error(`Impossible d'enregistrer les articles : ${itemsError.message}`);
       }
 
       if (codeApplique) {
@@ -171,7 +165,7 @@ export default function CheckoutPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              order_id: order.id,
+              order_id: orderId,
               client_telephone: telephone,
               client_email: user?.email ?? null,
               mode_fret: selectedMode,
@@ -183,14 +177,11 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      router.push(`/commande/${order.id}`);
+      router.push(`/commande/${orderId}`);
     } catch (err) {
-      // DIAGNOSTIC TEMPORAIRE : message détaillé au lieu du message générique,
-      // le temps de trouver la cause exacte du bug mobile. À revenir en arrière
-      // une fois corrigé (voir commentaire plus bas).
-      const detail = err instanceof Error ? err.message : JSON.stringify(err);
       console.error(err);
-      setErreur(`Erreur de diagnostic : ${detail}`);
+      const detail = err instanceof Error ? err.message : "Merci de réessayer.";
+      setErreur(detail);
     } finally {
       setEnvoiEnCours(false);
     }
