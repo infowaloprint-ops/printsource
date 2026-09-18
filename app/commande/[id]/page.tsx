@@ -50,28 +50,35 @@ type LigneCommande = {
   id: string;
   quantite: number;
   prix_unitaire: number;
-  products: { nom: string } | null;
+  produit_nom: string;
 };
 
 export default function CommandePage({ params }: { params: { id: string } }) {
   const [order, setOrder] = useState<Order | null>(null);
   const [lignes, setLignes] = useState<LigneCommande[]>([]);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
-      .from("orders")
-      .select("*")
-      .eq("id", params.id)
-      .single()
-      .then(({ data }) => setOrder(data as Order));
+      .rpc("get_order_receipt", { p_order_id: params.id })
+      .then(({ data, error }) => {
+        if (error) {
+          setErreur(error.message);
+          return;
+        }
+        if (data && data.length > 0) {
+          setOrder(data[0] as Order);
+        } else {
+          setErreur("Commande introuvable.");
+        }
+      });
 
     supabase
-      .from("order_items")
-      .select("id, quantite, prix_unitaire, products(nom)")
-      .eq("order_id", params.id)
-      .then(({ data }) => setLignes((data as unknown as LigneCommande[]) ?? []));
+      .rpc("get_order_items_receipt", { p_order_id: params.id })
+      .then(({ data }) => setLignes((data as LigneCommande[]) ?? []));
   }, [params.id]);
 
+  if (erreur) return <p className="text-sm text-clay-600">{erreur}</p>;
   if (!order) return <p className="text-sm text-ink-900/60">Chargement de la commande...</p>;
 
   const etapeActive = ETAPES.findIndex((e) => e.id === order.statut);
@@ -80,7 +87,9 @@ export default function CommandePage({ params }: { params: { id: string } }) {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="no-print flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">Commande {formatNumeroFacture(order.numero_sequence, order.created_at)}</h1>
+          <h1 className="text-lg font-semibold">
+            Commande {formatNumeroFacture(order.numero_sequence, order.created_at)}
+          </h1>
           <p className="text-sm text-ink-900/60">Merci pour votre commande.</p>
         </div>
         <button
@@ -116,9 +125,7 @@ export default function CommandePage({ params }: { params: { id: string } }) {
         </p>
       )}
 
-      {/* ============ REÇU — visible à l'écran et à l'impression ============ */}
       <div className="border border-ink-900/10 rounded-xl overflow-hidden bg-white shadow-sm print:shadow-none print:border-0">
-        {/* En-tête */}
         <div className="bg-clay-600 px-6 py-5 flex items-center justify-between text-white">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center font-semibold text-lg">
@@ -142,7 +149,6 @@ export default function CommandePage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Client & livraison */}
           <div className="grid grid-cols-2 gap-6 text-sm">
             <div>
               <p className="text-[11px] uppercase tracking-wide text-ink-900/40 mb-1.5">Facturé à</p>
@@ -156,7 +162,6 @@ export default function CommandePage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          {/* Tableau articles */}
           <div>
             <table className="w-full text-sm">
               <thead>
@@ -170,7 +175,7 @@ export default function CommandePage({ params }: { params: { id: string } }) {
               <tbody>
                 {lignes.map((ligne) => (
                   <tr key={ligne.id} className="border-b border-ink-900/5">
-                    <td className="py-2">{ligne.products?.nom ?? "Article"}</td>
+                    <td className="py-2">{ligne.produit_nom}</td>
                     <td className="py-2 text-center text-ink-900/60">{ligne.quantite}</td>
                     <td className="py-2 text-right text-ink-900/60">{formatFcfa(ligne.prix_unitaire)}</td>
                     <td className="py-2 text-right font-medium">
@@ -182,7 +187,6 @@ export default function CommandePage({ params }: { params: { id: string } }) {
             </table>
           </div>
 
-          {/* Totaux */}
           <div className="flex justify-end">
             <div className="w-full max-w-[240px] space-y-1.5 text-sm">
               <div className="flex justify-between text-ink-900/70">
@@ -206,7 +210,6 @@ export default function CommandePage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          {/* Paiement & livraison */}
           <div className="grid grid-cols-2 gap-6 text-sm pt-4 border-t border-ink-900/10">
             <div>
               <p className="text-[11px] uppercase tracking-wide text-ink-900/40 mb-1">Mode de paiement</p>
@@ -221,12 +224,6 @@ export default function CommandePage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/*
-          Pied de page légal — à compléter dès que le NINEA/RCCM et la raison
-          sociale officielle sont confirmés (entreprise individuelle).
-          Exemple à activer plus tard :
-          <p>NINEA XXXXXXX · RCCM SN-DKR-XXXX-X-XXXX · [Nom légal de l'entreprise]</p>
-        */}
         <div className="bg-paper px-6 py-4 text-center">
           <p className="text-xs text-ink-900/40">Merci pour votre confiance — SourceTeranga</p>
         </div>
